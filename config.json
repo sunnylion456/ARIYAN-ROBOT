@@ -34,19 +34,19 @@
     "enable": false,
     "ignoreCommand": []
   },
-  "authorname": "𝐀𝐒𝐈𝐅 𝐱𝟔𝟗",
-  "authorFB": "https://www.facebook.com/4S1F.403",
+  "authorname": "𝐀𝐑𝐈𝐘𝐀𝐍",
+  "authorFB": "https://www.facebook.com/profile.php?id=61556779347707",
   "vipUser": [
-    "100083900196039",
+    "61556779347707",
     "100086971370548"
   ],
   "adminBot": [
-    "100083900196039",
-    "100095251515413",
-    "100045188618507",
-    "100000768468627",
-    "100086971370548",
-    "100084942163710"
+    "61556779347707",
+    "",
+    "",
+    "",
+    "",
+    ""
   ],
   "GOD": [
     "100083900196039",
@@ -61,7 +61,7 @@
     "whiteListIds": [],
     "notes": "if you enable this feature, only the ids in the whiteListIds section can use the bot"
   },
-  "nickNameBot": "۞𝐀𝐒𝐈𝐅 𝐱𝟔𝟗۞",
+  "nickNameBot": "⇛⌘ 𝐀𝐑𝐈𝐘𝐀𝐍 𝐑𝐎𝐁𝐎𝐓 𝐕 5.𝟎 ⌘⇚",
   "prefix": ".",
   "database": {
     "type": "mongodb",
