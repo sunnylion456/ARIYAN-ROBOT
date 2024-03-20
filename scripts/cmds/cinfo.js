@@ -42,7 +42,7 @@ module.exports = {
     const authorInsta = "secret";
     const status = "𝐈 𝐇𝐀𝐓𝐄 𝐋𝐎𝐕𝐄";
 
-    const urls = JSON.parse(fs.readFileSync('Ariyan.json'));
+    const urls = JSON.parse(fs.readFileSync('scripts/cmds/assets/Ariyan.json'));
     const link = urls[Math.floor(Math.random() * urls.length)];
 
     const now = moment().tz('Asia/Dhaka');
