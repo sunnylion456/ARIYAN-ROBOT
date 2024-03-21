@@ -80,7 +80,7 @@ module.exports = {
 ➠Uptime↠ ${uptimeString}
 
 ﹋﹋﹋﹋﹋﹋﹋﹋﹋﹋﹋﹋﹋﹋
-Thanks for using ↠ \${botName}
+Thanks for using ↠\n⇛⌘ 𝐀𝐑𝐈𝐘𝐀𝐍 𝐑𝐎𝐁𝐎𝐓 𝐕 5.𝟎 ⌘⇚
 ﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏`,
       attachment: await global.utils.getStreamFromURL(link)
     });
