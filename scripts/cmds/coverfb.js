@@ -1,55 +1,88 @@
 const axios = require('axios');
-const jimp = require("jimp");
-const fs = require("fs");
+const moment = require('moment-timezone');
 
 module.exports = {
-  config: {
-    name: "fbcover",
-    aliases: ['coverfb'],
-    version: "1.0",
-    author: "Samir.",
-    countDown: 10,
-    role: 0,
-    shortDescription: "Create fb cover",
-    longDescription: "Create fb cover",
-    category: "avt & banners",
-    guide: {
-      en: "{p}{n} name | subname | address | email | phone nbr | color (default = no )",
+    config: {
+        name: "ramadan",
+        aliases: ["ifter", "iftar", "sahri", "sehri", "seheri"],
+        version: "1.0",
+        author: "RUBISH | AYAN",
+        countDown: 5,
+        role: 0,
+        description: {
+            vi: "Lấy thời gian Iftar cho một thành phố",
+            en: "Get detailed Iftar time for a city."
+        },
+        category: "Tools",
+        guide: {
+            vi: "{pn} <tên thành phố>",
+            en: "{pn} <city name>"
+        }
     },
-  },
 
-  onStart: async function ({ api, event, args }) {
-    const uid = event.senderID;
-    const info = args.join(" ");
+    onStart: async function ({ api, args, event }) {
+        let cityName = args.join(' ') || "Sirajganj";
 
-    if (!info) {
-      return api.sendMessage("Please enter in the format:\nfbcover name | subname | address | email | phone nbr | color (default = no )", event.threadID);
-    } else {
-      const msg = info.split("|");
-      const name = msg[0].trim();
-      const subname = msg[1].trim();
-      const address = msg[2].trim();
-      const email = msg[3].trim();
-      const phone = msg[4].trim();
-      const color = msg[5].trim();
+        try {
+            const response = await axios.get(`https://noobs-apihouse.onrender.com/dipto/iftar?name=${encodeURIComponent(cityName)}`);
+            const iftarInfo = response.data;
 
-      api.sendMessage("Processing your cover, please wait...", event.threadID);
+            if (!iftarInfo) {
+                return api.sendMessage("❎ | Iftar time not found or invalid response.", event.threadID);
+            }
 
-      const img = `https://www.nguyenmanh.name.vn/api/fbcover1?name=${encodeURIComponent(name)}&uid=${uid}&address=${encodeURIComponent(address)}&email=${encodeURIComponent(email)}&subname=${encodeURIComponent(subname)}&sdt=${encodeURIComponent(phone)}&color=${encodeURIComponent(color)}&apikey=FSShCQne`;
+            const currentDate = moment().tz('Asia/Dhaka');
 
-      try {
-        const response = await axios.get(img, { responseType: 'arraybuffer' });
-        const image = await jimp.read(response.data);
+            const nextIftarTime = moment.tz(`${currentDate.format('YYYY-MM-DD')} ${iftarInfo.iftar_time}`, 'YYYY-MM-DD hh:mm A', 'Asia/Dhaka');
+            if (nextIftarTime.isBefore(currentDate)) {
+                nextIftarTime.add(1, 'day');
+            }
+            const iftarTimeRemaining = nextIftarTime.diff(currentDate, 'minutes');
+            const iftarRemainingHours = Math.floor(Math.abs(iftarTimeRemaining) / 60);
+            const iftarRemainingMinutes = Math.abs(iftarTimeRemaining) % 60;
+            const iftarRemainingFormatted = `${iftarTimeRemaining < 0 ? '-' : ''}${iftarRemainingHours} hours ${iftarRemainingMinutes} min`;
 
-        const outputPath = `./fbcover_${uid}.png`;
-        await image.writeAsync(outputPath);
+            const nextSahriTime = moment.tz(`${currentDate.format('YYYY-MM-DD')} ${iftarInfo.sher_itime}`, 'YYYY-MM-DD hh:mm A', 'Asia/Dhaka');
+            if (nextSahriTime.isBefore(currentDate)) {
+                nextSahriTime.add(1, 'day');
+            }
+            const sahriTimeRemaining = nextSahriTime.diff(currentDate, 'minutes');
+            const sahriRemainingHours = Math.floor(Math.abs(sahriTimeRemaining) / 60);
+            const sahriRemainingMinutes = Math.abs(sahriTimeRemaining) % 60;
+            const sahriRemainingFormatted = `${sahriTimeRemaining < 0 ? '-' : ''}${sahriRemainingHours} hours ${sahriRemainingMinutes} min`;
 
-        const attachment = fs.createReadStream(outputPath);
-        api.sendMessage({ attachment }, event.threadID, () => fs.unlinkSync(outputPath));
-      } catch (error) {
-        console.error(error);
-        api.sendMessage("An error occurred while generating the FB cover.", event.threadID);
-      }
+            const formattedResponse = `
+‡   𝙸𝙵𝚃𝙰𝚁 𝙰𝙽𝙳 𝚂𝙴𝙷𝚁𝙸 𝚃𝙸𝙼𝙴   ‡
+﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏
+◈ 𝙲𝚒𝚝𝚢: ${iftarInfo.city}
+◈ 𝙳𝚊𝚝𝚎: ${moment(currentDate).tz('Asia/Dhaka').format('D MMMM YYYY')} 
+◈ 𝙳𝚊𝚢: ${moment(currentDate).tz('Asia/Dhaka').format('dddd')}
+﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏
+▣ 𝚁𝚊𝚖𝚊𝚍𝚊𝚗: ${iftarInfo.ramadan}
+▣ 𝙸𝚏𝚝𝚊𝚛 𝚃𝚒𝚖𝚎: ${iftarInfo.iftar_time}
+▣ 𝚂𝚎𝚑𝚛𝚒 𝚃𝚒𝚖𝚎: ${iftarInfo.sher_itime}
+﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏
+▣ 𝙸𝚏𝚝𝚊𝚛 𝚁𝚎𝚖𝚊𝚒𝚗𝚒𝚗𝚐: ${iftarRemainingFormatted}
+▣ 𝚂𝚎𝚑𝚛𝚒 𝚁𝚎𝚖𝚊𝚒𝚗𝚒𝚗𝚐: ${sahriRemainingFormatted}
+﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏
+▣ 𝙵𝚊𝚓𝚛 𝚃𝚒𝚖𝚎: ${iftarInfo.fazar_time}
+▣ 𝚂𝚞𝚗𝚜𝚎𝚝 𝚃𝚒𝚖𝚎: ${iftarInfo.sunset}
+▣ 𝙳𝚑𝚞𝚑𝚛 𝚃𝚒𝚖𝚎: ${iftarInfo.oju_time_sokal}
+▣ 𝙰𝚜𝚛 𝚃𝚒𝚖𝚎: ${iftarInfo.oju_time_bikal}
+▣ 𝙼𝚊𝚐𝚑𝚛𝚒𝚋 𝚃𝙸𝚖𝚎: ${iftarInfo.iftar_time}
+▣ 𝙸𝚜𝚑𝚊: ${iftarInfo.oju_time_sondha}
+﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏
+◈ 𝙲𝚞𝚛𝚛𝚎𝚗𝚝 𝚃𝚒𝚖𝚎 - ${moment(currentDate).tz('Asia/Dhaka').format('hh:mm A')}
+    ≔  𝐀𝐬𝐬𝐚𝐥𝐚𝐦𝐮 𝐀𝐥𝐚𝐢𝐤𝐮𝐦  ≕
+﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏`;
+
+            await api.sendMessage({
+                body: formattedResponse,
+                attachment: await global.utils.getStreamFromURL(iftarInfo.url)
+            }, event.threadID);
+        } catch (error) {
+            console.error('❎ | Error fetching iftar data:', error);
+            api.sendMessage("❎ | An error occurred while processing the request.", event.threadID);
+        }
     }
-  },
 };
