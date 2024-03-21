@@ -1,101 +1,79 @@
-const axios = require("axios");
-const fs = require("fs");
-const request = require("request");
-
-
-function convert(time) {
-  const date = new Date(time);
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  const seconds = date.getSeconds();
-  const formattedDate = `${day < 10 ? "0" + day : day}/${month < 10 ? "0" + month : month}/${year}||${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
-  return formattedDate;
-}
-
-const headers = {
-  "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like) Version/12.0 eWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1",
-  "accept": "application/json, text/plain, /"
-};
+const axios = require('axios');
 
 module.exports = {
-  config: {
-    name: "stalk",
-    version: "1.0",
-    author: "Deku & Eugene Aguilar",
-    countDown: 5,
-    role: 0,
-    shortDescription: "Get info using uid/mention/reply to a message",
-    longDescription: {
-      en: "Get info using uid/mention/reply to a message",
+    config: {
+        name: "stalk",
+        aliases: ["userinfo"],
+        version: "1.0", 
+        author: "ARIYAN",
+        description: {
+            vi: "Thu thập thông tin từ một người dùng trên Facebook.",
+            en: "Retrieve information about a user on Facebook."
+        },
+        category: "Tools",
+        guide: {
+            vi: "{pn} <@mention hoặc trả lời tin nhắn của người dùng>",
+            en: "{pn} <@mention or reply to a message of the user>"
+        }
     },
-    category: "info",
-    guide: {
-      en: "{pn}reply/uid/@mention",
-    },
-  },
 
-  onStart: async function ({ api, event, args }) {
-    let path = __dirname + `/cache/info.png`;
-    const token = "EAAD6V7os0gcBO2aUDSZBhLGzreMcWtcCv1DONhlZCcdMIR4greGiFuJn9bL5IPQL0C3UolS5Iq4F9Uk0dwZAsMd2hScJJN9l5JP3wXFgUEqYjBTsP96FHOBdbqYRgGwbAaO7jvUZAyfe5aeqpqch58bAYKNTFRGvHrKWc9SbscoZBWE4uP5pdJdqQjIVV0yVWUwZDZD"; //*get your EAAD6V7 token here https://acess.ainz-sama101.repl.co/facebook/token?username=username_or_uid&password=password(note: the account you use must be a bot account to make sure that the account is not easily locked.)*/
- 
-    let id;
-    if (args.join().includes('@')) {
-      id = Object.keys(event.mentions)[0];
-    } else {
-      id = args[0] || event.senderID;
+    onStart: async function ({ api, args, event }) {
+        let userId;
+        let userName;
+
+        try {
+            if (event.type === "message_reply") {
+                userId = event.messageReply.senderID;
+                const user = await api.getUserInfo(userId);
+                userName = user[userId].name;
+            } else {
+                const input = args.join(" ");
+
+                if (event.mentions && Object.keys(event.mentions).length > 0) {
+                    userId = Object.keys(event.mentions)[0];
+                    const user = await api.getUserInfo(userId);
+                    userName = user[userId].name;
+                } else if (/^\d+$/.test(input)) {
+                    userId = input;
+                    const user = await api.getUserInfo(userId);
+                    userName = user[userId].name;
+                } else if (input.includes("facebook.com")) {
+                    const { findUid } = global.utils;
+                    let linkUid;
+                    try {
+                        linkUid = await findUid(input);
+                    } catch (error) {
+                        console.error(error);
+                        return api.sendMessage(
+                            "⚠️ |  I couldn't find the user ID from the provided link. Please try again with the user ID.\n\nExample ➾ .stalk 100073291639820",
+                            event.threadID
+                        );
+                    }
+                    if (linkUid) {
+                        userId = linkUid;
+                        const user = await api.getUserInfo(userId);
+                        userName = user[userId].name;
+                    }
+                } else {
+                    userId = event.senderID;
+                    const user = await api.getUserInfo(userId);
+                    userName = user[userId].name;
+                }
+            }
+
+            const response = await axios.get(`https://noobs-apihouse.onrender.com/dipto/fbinfo?id=${userId}&key=dipto008`);
+            const { data, photo } = response.data;
+
+            const formattedData = data.split('\n').filter(item => item.trim() !== '');
+            const formattedResponse = formattedData.map(item => item.trim()).join('\n');
+
+            await api.sendMessage({
+                body: `${formattedResponse}`,
+                attachment: await global.utils.getStreamFromURL(photo)
+            }, event.threadID);
+        } catch (error) {
+            console.error('Error fetching stalk data:', error);
+            api.sendMessage("An error occurred while processing the request.", event.threadID);
+        }
     }
-
-    if (event.type === "message_reply") {
-      id = event.messageReply.senderID;
-    }
-
-    try {
-      const resp = await axios.get(`https://graph.facebook.com/${id}?fields=id,is_verified,cover,created_time,work,hometown,username,link,name,locale,location,about,website,birthday,gender,relationship_status,significant_other,quotes,first_name,subscribers.limit(0)&access_token=${token}`, { headers });
-
-      const name = resp.data.name;
-      const link_profile = resp.data.link;
-      const uid = resp.data.id;
-      const first_name = resp.data.first_name;
-      const username = resp.data.username || "No data!";
-      const created_time = convert(resp.data.created_time);
-      const web = resp.data.website || "No data!";
-      const gender = resp.data.gender;
-      const relationship_status = resp.data.relationship_status || "No data!";
-      const love = resp.data.significant_other || "No data!";
-      const bday = resp.data.birthday || "No data!";
-      const follower = resp.data.subscribers.summary.total_count || "No data!";
-      const is_verified = resp.data.is_verified;
-      const quotes = resp.data.quotes || "No data!";
-      const about = resp.data.about || "No data!";
-      const locale = resp.data.locale || "No data!";
-      const hometown = !!resp.data.hometown ? resp.data.hometown.name : "No Hometown";
-      const cover = resp.data.cover || "No Cover photo";
-      const avatar = `https://graph.facebook.com/${id}/picture?width=1500&height=1500&access_token=1174099472704185|0722a7d5b5a4ac06b11450f7114eb2e9`;
-
-      
-      const cb = function () {
-        api.sendMessage({
-          body: `•——INFORMATION——•
-    Name: ${name}
-    First name: ${first_name}
-    Creation Date: ${created_time}
-    Profile link: ${link_profile}
-    Gender: ${gender}
-    Relationship Status: ${relationship_status}
-    Birthday: ${bday}
-    Follower(s): ${follower}
-    Hometown: ${hometown}
-    Locale: ${locale}
-    •——END——•`,
-          attachment: fs.createReadStream(path)
-        }, event.threadID, () => fs.unlinkSync(path), event.messageID);
-      };
-      request(encodeURI(avatar)).pipe(fs.createWriteStream(path)).on("close", cb);
-    } catch (err) {
-      api.sendMessage(`Error: ${err.message}`, event.threadID, event.messageID);
-    }
-  }
 };
