@@ -8,7 +8,7 @@ const path = require("path");
 module.exports = {
   config: {
     name: "pinterest",
-    aliases: ["pin"],
+    aliases: ["pic"],
     version: "1.0",
     author: " Samir Œ | rehat--",
     role: 0,
