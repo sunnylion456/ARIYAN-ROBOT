@@ -1,70 +1,65 @@
 const axios = require("axios");
 const fs = require("fs-extra");
 const path = require("path");
- 
+const request = require("request");
 /*Do not change
         the credit 🐢👑🥴*/
  
 module.exports = {
   config: {
-    name: "pinterest",
-    aliases: ["pic"],
+    name: "pic",
+    aliases: ["pinterest"],
     version: "1.0",
-    author: " Samir Œ | rehat--",
+    author: "𝐀𝐒𝐈𝐅 𝐱𝟔𝟗",
     role: 0,
-    countDown: 60,
+    countDown: 20,
     longDescription: {
       en: "Get Image From Pinterest",
     },
     category: "Search",
     guide: {
-      en: "{pn} <search query> <number of images>\nExample: {pn} Tomozaki -5"
+      en: "{pn} <search query> <number of images>\nExample: {pn} Hacker -10"
+    },
+    langs: {
+      "en": {
+          "missing": '{pn} anime girl - 10'
+      }
     }
   },
 
-  onStart: async function ({ api, event, args }) {
+  onStart: async function ({ api, event, args, message }) {
     try {
-      const keySearch = args.join(" ");
-      if (!keySearch.includes("-")) {
-        return api.sendMessage(
-          "Please enter the search query and -number of images (1-6)",
-          event.threadID,
-          event.messageID
-        );
-      }
-      const keySearchs = keySearch.substr(0, keySearch.indexOf("-"));
-      let numberSearch = keySearch.split("-").pop() || 9;
-      if (numberSearch > 9) {
-        numberSearch = 9;
-      }
-
-      const apiUrl = `https://api-samirxyz.onrender.com/api/Pinterest?query=${encodeURIComponent(keySearchs)}& number=${numberSearch}&apikey=global`;
-
-      const res = await axios.get(apiUrl);
-      const data = res.data.result;
-      const imgData = [];
-
-      for (let i = 0; i < Math.min(numberSearch, data.length); i++) {
-        const imgResponse = await axios.get(data[i], {
-          responseType: "arraybuffer"
-        });
-        const imgPath = path.join(__dirname, "cache", `${i + 1}.jpg`);
-        await fs.outputFile(imgPath, imgResponse.data);
-        imgData.push(fs.createReadStream(imgPath));
-      }
-
-      await api.sendMessage({
+    const keySearch = args.join(" ");
+  const { spotify, pintarest } = require('nayan-server')
+    if(keySearch.includes("-") == false) 
+      return message.reply("Please enter the search query and - number of images (1-50)", event.threadID, event.messageID)
+    const keySearchs = keySearch.substr(0, keySearch.indexOf('-'))
+    const numberSearch = keySearch.split("-").pop() || 6
+    const res = await pintarest(`${encodeURIComponent(keySearchs)}`);
+  console.log(res)
+    const data = res.data;
+    var num = 0;
+    var imgData = [];
+    for (var i = 0; i < parseInt(numberSearch); i++) {
+      let path = __dirname + `/cache/${num+=1}.jpg`;
+      let getDown = (await axios.get(`${data[i]}`, { responseType: 'arraybuffer' })).data;
+      fs.writeFileSync(path, Buffer.from(getDown, 'utf-8'));
+      imgData.push(fs.createReadStream(__dirname + `/cache/${num}.jpg`));
+    }
+    message.reply({
         attachment: imgData,
-      }, event.threadID, event.messageID);
-
-      await fs.remove(path.join(__dirname, "cache"));
-    } catch (error) {
+        body: numberSearch + ' images for '+ keySearchs
+    }, event.threadID, event.messageID)
+    for (let ii = 1; ii < parseInt(numberSearch); ii++) {
+        fs.unlinkSync(__dirname + `/cache/${ii}.jpg`)
+    };
+      } catch (error) {
       console.error(error);
       return api.sendMessage(
         `An error occurred.`,
         event.threadID,
         event.messageID
       );
-    }
-  }
-};
+}
+}
+     }
