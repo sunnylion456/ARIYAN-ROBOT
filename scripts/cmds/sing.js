@@ -1,29 +1,27 @@
 module.exports = {
   config: {
     name: "sing",
-    aliases: ['music', 'sing', 'play'],
     version: "1.0",
+    author: "𝐀𝐘𝐀𝐍",
     role: 0,
-    author: "AceGun",
-    cooldowns: 5,
-    shortdescription: "download music from YouTube",
-    longdescription: "",
-    category: "music",
-    usages: "{pn} <MusicName>",
-    dependencies: {
-      "fs-extra": "",
-      "request": "",
-      "axios": "",
-      "ytdl-core": "",
-      "yt-search": ""
+    shortDescription: {
+      vi: "Tìm kiếm nhạc và nghe.",
+      en: "Search for music and listen."
+    },
+    longDescription: {
+      vi: "Lệnh `music` cho phép bạn tìm kiếm bản nhạc và nghe trực tiếp mà không cần trả lời bằng số.",
+      en: "The `music` command allows you to search for music and listen directly without replying with numbers."
+    },
+    category: "media",
+    guide: {
+      en: "{pn} <song name>"
     }
   },
-
-  onStart: async ({ api, event }) => {
+  
+  onStart: async function ({ api, event }) {
     const axios = require("axios");
     const fs = require("fs-extra");
     const ytdl = require("ytdl-core");
-    const request = require("request");
     const yts = require("yt-search");
 
     const input = event.body;
@@ -31,28 +29,29 @@ module.exports = {
     const data = input.split(" ");
 
     if (data.length < 2) {
-      return api.sendMessage("Please specify a music name.", event.threadID);
+      return api.sendMessage("⚠️ | Please enter a music name.", event.threadID);
     }
 
     data.shift();
-    const musicName = data.join(" ");
+    const song = data.join(" ");
 
     try {
-      const searchMessage = await api.sendMessage(`✅ | Searching music for "${musicName}".\⏳ | Please wait...`, event.threadID);
+      const searchingMessage = await api.sendMessage(`⏳ | Searching Music "${song}"`, event.threadID);
 
-      const searchResults = await yts(musicName);
+      const searchResults = await yts(song);
       if (!searchResults.videos.length) {
-        api.unsendMessage(searchMessage.messageID); // Unsend the searching message
-        return api.sendMessage("No music found.", event.threadID, event.messageID);
+        await api.sendMessage("Error: Invalid request.", event.threadID);
+        await api.unsendMessage(searchingMessage.messageID);
+        return;
       }
 
-      const music = searchResults.videos[0];
-      const musicUrl = music.url;
+      const video = searchResults.videos[0];
+      const videoUrl = video.url;
 
-      const stream = ytdl(musicUrl, { filter: "audioonly" });
+      const stream = ytdl(videoUrl, { filter: "audioonly" });
 
-      const fileName = `${event.senderID}.mp3`;
-      const filePath = __dirname + `/cache/${fileName}`;
+      const fileName = `music.mp3`;
+      const filePath = __dirname + `/tmp/${fileName}`;
 
       stream.pipe(fs.createWriteStream(filePath));
 
@@ -61,30 +60,36 @@ module.exports = {
       });
 
       stream.on('info', (info) => {
-        console.info('[DOWNLOADER]', `Downloading music: ${info.videoDetails.title}`);
+        console.info('[DOWNLOADER]', `Downloading ${info.videoDetails.title} by ${info.videoDetails.author.name}`);
       });
 
-      stream.on('end', () => {
+      stream.on('end', async () => {
         console.info('[DOWNLOADER] Downloaded');
 
-        if (fs.statSync(filePath).size > 104857600) {
+        if (fs.statSync(filePath).size > 26214400) {
           fs.unlinkSync(filePath);
-          return api.sendMessage('❌ | The file could not be sent because it is larger than 100MB.', event.threadID);
+          await api.sendMessage('[ERR] The file could not be sent because it is larger than 25MB.', event.threadID);
+        } else {
+          const message = {
+            body: `
+♡ˍˍˍ𝐌𝐔𝐒𝐈𝐂 𝐅𝐎𝐔𝐍𝐃ˍˍˍ♡
+
+➺ 𝐒𝐎𝐍𝐆 𝐓𝐈𝐓𝐋𝐄: ${video.title}
+
+➺ 𝐀𝐑𝐓𝐈𝐒𝐓: ${video.author.name}
+
+♡ˍˍˍˍ𝐀𝐘𝐀𝐍 𝐑𝐎𝐁𝐎𝐓ˍˍˍˍ♡`,
+            attachment: fs.createReadStream(filePath)
+          };
+
+          await api.sendMessage(message, event.threadID);
         }
 
-        const message = {
-          body: `💁‍♀️ | Here's your music\n\n🔮 | Title: ${music.title}\n⏰ | Duration: ${music.duration.timestamp}`,
-          attachment: fs.createReadStream(filePath)
-        };
-
-        api.sendMessage(message, event.threadID, () => {
-          fs.unlinkSync(filePath);
-          api.unsendMessage(searchMessage.messageID); // Unsend the searching message
-        });
+        await api.unsendMessage(searchingMessage.messageID);
       });
     } catch (error) {
       console.error('[ERROR]', error);
-      api.sendMessage('🥺 | An error occurred while processing the command.', event.threadID);
+      await api.sendMessage('An error occurred while processing the command.', event.threadID);
     }
-  }
-};
+  }      
+        }
