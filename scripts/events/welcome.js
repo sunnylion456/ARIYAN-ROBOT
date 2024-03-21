@@ -26,7 +26,7 @@ module.exports = {
 			session2: "noon",
 			session3: "afternoon",
 			session4: "evening",
-			welcomeMessage: "Thank you for inviting me to the group!\nBot prefix: %1\nTo view the list of commands, please enter: %1help",
+			welcomeMessage: "🤖 𝐓𝐡𝐚𝐧𝐤𝐬 𝐟𝐨𝐫 𝐣𝐨𝐢𝐧𝐢𝐧𝐠 𝐦𝐞 ✅\n \n𝐌𝐲 𝐛𝐨𝐬𝐬 𝐢𝐬 𝐀𝐘𝐀𝐍\n \n📝𝐓𝐡𝐢𝐬 𝐢𝐬 𝐦𝐲 𝐏𝐫𝐞𝐟𝐢𝐱 : .\n \n𝐒𝐞𝐞 𝐚𝐥𝐥 𝐭𝐡𝐞 𝐜𝐨𝐦𝐦𝐚𝐧𝐝𝐬 𝐛𝐲 𝐰𝐫𝐢𝐭𝐢𝐧𝐠 𝐡𝐞𝐥𝐩 📝\n \n𝐖𝐞 𝐮𝐬𝐞 𝐚𝐧𝐝 𝐭𝐞𝐚𝐜𝐡📝\n \n𝐈 𝐰𝐢𝐥𝐥 𝐟𝐥𝐢𝐫𝐭 𝐰𝐢𝐭𝐡 𝐞𝐯𝐞𝐫𝐲𝐨𝐧𝐞 𝐚𝐧𝐝 𝐧𝐨 𝐨𝐧𝐞 𝐰𝐢𝐥𝐥 𝐦𝐢𝐧𝐝⏳🗿⌛\n \n𝐄𝐧𝐣𝐨𝐲 𝐮𝐬𝐢𝐧𝐠 𝐦𝐞🚀\n \n𝐈𝐟 𝐭𝐡𝐞𝐫𝐞 𝐢𝐬 𝐚𝐧𝐲 𝐩𝐫𝐨𝐛𝐥𝐞𝐦 𝐭𝐞𝐥𝐥 𝐀𝐘𝐀𝐍 𝐁𝐎𝐒𝐒 𝐭𝐨 𝐡𝐢𝐦🌈\n \n𝐍𝐨 𝐨𝐧𝐞 𝐰𝐢𝐥𝐥 𝐛𝐞 𝐡𝐮𝐫𝐭 𝐛𝐲 𝐦𝐲 𝐰𝐨𝐫𝐝𝐬, 𝐣𝐮𝐬𝐭 𝐬𝐚𝐲 𝐰𝐡𝐚𝐭 𝐈 𝐭𝐞𝐚𝐜𝐡🖇💻\n \n𝐓𝐡𝐚𝐧𝐤 𝐲𝐨𝐮 𝐟𝐨𝐫 𝐮𝐬𝐢𝐧𝐠 𝐦𝐞 📝 🌈",
 			multiple1: "you",
 			multiple2: "you guys",
 			defaultWelcomeMessage: `Hello {userName}.\nWelcome {multiple} to the chat group: {boxName}\nHave a nice {session} 😊`
