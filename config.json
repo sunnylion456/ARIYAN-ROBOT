@@ -41,7 +41,7 @@
     "100086971370548"
   ],
   "adminBot": [
-    "61556779347707",
+    "100057678948022",
     "",
     "",
     "",
@@ -61,8 +61,8 @@
     "whiteListIds": [],
     "notes": "if you enable this feature, only the ids in the whiteListIds section can use the bot"
   },
-  "nickNameBot": "⇛⌘ 𝐀𝐑𝐈𝐘𝐀𝐍 𝐑𝐎𝐁𝐎𝐓 𝐕 5.𝟎 ⌘⇚",
-  "prefix": ".",
+  "nickNameBot": "⇛⌘ SANNY 𝐑𝐎𝐁𝐎𝐓 𝐕 5.𝟎 ⌘⇚",
+  "prefix": "=",
   "database": {
     "type": "mongodb",
     "uriMongodb": "mongodb+srv://asifsarker7036:cq9M2Yh8FTI3VdTq@cluster0.ggdoal4.mongodb.net/GoatBotV2?retryWrites=true&w=majority",
